@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="layout">
+<head>
+    <title>북마크</title>
+</head>
+<body>
+<h1 layout:fragment="header">북마크</h1>
+<div layout:fragment="content" class="container">
+    <div class="panel-body">
+        <table class="table table-bordered table-striped table-hover table-condensed">
+            <thead>
+            <tr>
+                <td class="span1">순번</td>
+                <td class="span2">isbn</td>
+                <td class="span5">책제목</td>
+                <td class="span2">날짜</td>
+                <td class="span1">삭제</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${bookmarks.empty}">
+                <td colspan="5">저장한 북마크가 없습니다.</td>
+            </tr>
+            <tr th:each="bookmark, index : ${bookmarks}">
+                <td th:text="${index.index + 1}"></td>
+                <td th:text="${bookmark.isbn}"></td>
+                <td th:text="${bookmark.title}"></td>
+                <td th:text="${bookmark.formattedCreateDate}"></td>
+                <td><a class="btn btn-small bookMarkLink" th:attr="id=${bookmark.id}"><i class="icon-remove-circle"></i> 삭제</a></td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="pagination pagination-centered">
+            <ul>
+                <li th:if="${pagingInfo.prev}"><a th:href="${pagingInfo.startPage} - 1">&laquo;</a></li>
+                <li th:classappend="${p.pageNumber} == ${searchOption.page} - 1 ? 'active' : '' " th:each="p:${pagingInfo.pageList}">
+                    <a th:href="${p.pageNumber} +1" th:text="${p.pageNumber} + 1"></a></li>
+                <li th:if="${pagingInfo.next}"><a th:href="${pagingInfo.endPage} + 1">&raquo;</a></li>
+            </ul>
+        </div>
+    </div>
+    <form id='pagingForm' th:action="@{/book/bookmark}" method="get">
+        <input type='hidden' name='page' th:value="${searchOption.page}" />
+        <input type='hidden' name='size' th:value="${searchOption.size}" />
+    </form>
+</div>
+</body>
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        $(document).ready(function() {
+            var pagingForm = $("#pagingForm");
+
+            $(".pagination a").click(function(e) {
+                e.preventDefault();
+                pagingForm.find('[name="page"]').val($(this).attr('href'));
+                pagingForm.submit();
+            });
+
+            $(".bookMarkLink").click(function(e){
+                e.preventDefault();
+                if (!confirm("북마크를 삭제하시겠습니까?")) {
+                    return;
+                }
+
+                $.ajax({
+                    type: "DELETE",
+                    url: "/api/bookmarks/" + $(this).attr("id"),
+                    success: function (result) {
+                        alert("북마크가 삭제되었습니다.");
+                        pagingForm.submit();
+                    },
+                    error: function(xhr) {
+                        console.log(xhr);
+                    }
+                });
+            });
+        });
+    </script>
+</th:block>
+</html>

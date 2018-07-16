@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="layout">
+<head>
+    <title>최근 검색내역</title>
+</head>
+<body>
+<h1 layout:fragment="header">최근 검색내역</h1>
+<div layout:fragment="content" class="container">
+    <div class="panel-body">
+        <table class="table table-bordered table-striped table-hover table-condensed">
+            <thead>
+            <tr>
+                <td class="span1">순번</td>
+                <td class="span4">검색어</td>
+                <td class="span2">날짜</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${histories.empty}">
+                <td colspan="3">검색한 내역이 없습니다.</td>
+            </tr>
+            <tr th:each="history, index : ${histories}">
+                <td th:text="${index.index + 1}"></td>
+                <td th:text="${history.searchKeyword}"></td>
+                <td th:text="${history.formattedSearchDate}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+
+    </script>
+</th:block>
+</html>
