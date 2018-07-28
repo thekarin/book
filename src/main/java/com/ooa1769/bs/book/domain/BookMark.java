@@ -1,4 +1,4 @@
-package com.ooa1769.bs.book;
+package com.ooa1769.bs.book.domain;
 
 import com.ooa1769.bs.member.Member;
 import com.ooa1769.bs.support.domain.UrlGeneratable;
@@ -19,7 +19,8 @@ public class BookMark extends AbstractEntity implements UrlGeneratable {
     private Long id;
 
     @Getter
-    private String isbn;
+    @Embedded
+    private Isbn isbn;
 
     @Getter
     private String title;
@@ -31,20 +32,34 @@ public class BookMark extends AbstractEntity implements UrlGeneratable {
     public BookMark() {
     }
 
-    public BookMark(String isbn, String title, Member member) {
+    public BookMark(Isbn isbn, String title, Member member) {
         this.isbn = isbn;
         this.title = title;
         this.member = member;
     }
 
     @Override
-    public String generateUrl() {
-        return null;
+    public String generateRestUrl() {
+        return String.format(Mappings.BOOKMARKS_CREATE_FORMAT, id);
     }
 
     @Override
-    public String generateRestUrl() {
-        return String.format(Mappings.BOOKMARKS_CREATE_FORMAT, id);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        BookMark bookMark = (BookMark) o;
+
+        if (isbn != null ? !isbn.equals(bookMark.isbn) : bookMark.isbn != null) return false;
+        return member != null ? member.equals(bookMark.member) : bookMark.member == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = isbn != null ? isbn.hashCode() : 0;
+        result = 31 * result + (member != null ? member.hashCode() : 0);
+        return result;
     }
 
     @Override

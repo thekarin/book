@@ -1,61 +1,67 @@
 package com.ooa1769.bs.web;
 
-import com.ooa1769.bs.book.Book;
-import com.ooa1769.bs.book.BookMark;
-import com.ooa1769.bs.book.SearchOption;
-import com.ooa1769.bs.book.SearchTarget;
+import com.ooa1769.bs.book.domain.Book;
+import com.ooa1769.bs.book.domain.BookMark;
+import com.ooa1769.bs.book.domain.SearchHistory;
 import com.ooa1769.bs.book.support.BookService;
+import com.ooa1769.bs.book.support.SearchHistoryService;
+import com.ooa1769.bs.book.support.search.ApiType;
+import com.ooa1769.bs.web.dto.BookSearchParam;
 import com.ooa1769.bs.member.Member;
-import com.ooa1769.bs.member.support.MemberService;
+import com.ooa1769.bs.support.domain.EnumMapper;
 import com.ooa1769.bs.support.security.LoginMember;
 import com.ooa1769.bs.support.util.Mappings;
+import com.ooa1769.bs.web.dto.PrevBookSearchParam;
+import com.ooa1769.bs.web.paging.PagingInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping(Mappings.BOOK)
 public class BookController {
 
     private final BookService bookService;
-    private final MemberService memberService;
+    private final SearchHistoryService searchHistoryService;
+    private final EnumMapper enumMapper;
 
     @Autowired
-    public BookController(BookService bookService, MemberService memberService) {
+    public BookController(BookService bookService, SearchHistoryService searchHistoryService, EnumMapper enumMapper) {
         this.bookService = bookService;
-        this.memberService = memberService;
+        this.searchHistoryService = searchHistoryService;
+        this.enumMapper = enumMapper;
     }
 
-    @RequestMapping(method = RequestMethod.GET)
-    public String index(@LoginMember Member member, @ModelAttribute("searchOption") SearchOption searchOption, Model model) {
-        if (!ObjectUtils.isEmpty(member) && !ObjectUtils.isEmpty(searchOption.getQuery())) {
-            memberService.addSearchHistory(member, searchOption.getQuery());
+    @RequestMapping(value = "/search/{apiType}", method = RequestMethod.GET)
+    public String search(@LoginMember Member member,
+                         @PathVariable("apiType") ApiType apiType,
+                         @ModelAttribute("searchOption") BookSearchParam bookSearchParam, Model model) {
+        if (!ObjectUtils.isEmpty(member) && !ObjectUtils.isEmpty(bookSearchParam.getQuery())) {
+            searchHistoryService.addSearchHistory(member, bookSearchParam.getQuery());
         }
 
-        Page<Book> pageBook = bookService.getBooksByKeyword(searchOption);
+        Page<Book> pageBook = bookService.getBooksByKeyword(apiType, bookSearchParam);
+        model.addAttribute("targets", enumMapper.targetTypeValues(apiType));
+        model.addAttribute("categories", enumMapper.categoryTypeValues(apiType));
+        model.addAttribute("sorts", enumMapper.sortTypeValues(apiType));
         model.addAttribute("books", pageBook.getContent());
-        model.addAttribute("targets", SearchTarget.values());
+        model.addAttribute("apiType", apiType);
         model.addAttribute("pagingInfo", new PagingInfo(pageBook));
-        return "book/index";
+        return "book/search";
     }
 
-    @RequestMapping(value = "/view", method = RequestMethod.GET)
-    public String view(@ModelAttribute("searchOption") SearchOption searchOption,
-                       @RequestParam(defaultValue = "") String type,
-                       @RequestParam(defaultValue = "") String keyword,
+    @RequestMapping(value = "/book/{apiType}", method = RequestMethod.GET)
+    public String view(@PathVariable("apiType") ApiType apiType,
+                       @ModelAttribute("searchOption") BookSearchParam bookSearchParam,
+                       @ModelAttribute("prevSearchOption") PrevBookSearchParam prevBookSearchParam,
                        Model model) {
-        model.addAttribute("book", bookService.getBookByIsbn(searchOption));
-        model.addAttribute("searchOption", searchOption);
-        model.addAttribute("type", type);
-        model.addAttribute("keyword", keyword);
+        model.addAttribute("book", bookService.getBookByIsbn(apiType, bookSearchParam));
+        model.addAttribute("apiType", apiType);
         return "book/view";
     }
 
@@ -65,11 +71,25 @@ public class BookController {
                                @RequestParam(defaultValue = "1") int page,
                                @RequestParam(defaultValue = "10") int size,
                                Model model) {
-        PageRequest pageRequest = new PageRequest(page - 1, size, Sort.Direction.ASC, "title");
-        Page<BookMark> pageBookMark = bookService.getBookMarksByMember(member, pageRequest);
-        model.addAttribute("searchOption", new SearchOption(page, size));
+        Pageable pageable = new PageRequest(page - 1, size, Sort.Direction.DESC, "createDate");
+        Page<BookMark> pageBookMark = bookService.getBookMarksByMember(member, pageable);
+        model.addAttribute("pageable", pageable);
         model.addAttribute("bookmarks", pageBookMark.getContent());
         model.addAttribute("pagingInfo", new PagingInfo(pageBookMark));
         return "book/bookmark";
+    }
+
+    // ============== SearchHistory ============
+    @RequestMapping("/history")
+    public String searchHistory(@LoginMember Member member,
+                                @RequestParam(defaultValue = "1") int page,
+                                @RequestParam(defaultValue = "10") int size,
+                                Model model) {
+        Pageable pageable = new PageRequest(page - 1, size, Sort.Direction.DESC, "searchDate");
+        Page<SearchHistory> pageSearchHistory = searchHistoryService.getHistoryByMember(member, pageable);
+        model.addAttribute("pageable", pageable);
+        model.addAttribute("histories", pageSearchHistory.getContent());
+        model.addAttribute("pagingInfo", new PagingInfo(pageSearchHistory));
+        return "book/searchHistory";
     }
 }

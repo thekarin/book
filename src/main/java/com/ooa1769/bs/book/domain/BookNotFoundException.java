@@ -1,4 +1,4 @@
-package com.ooa1769.bs.book;
+package com.ooa1769.bs.book.domain;
 
 public class BookNotFoundException extends RuntimeException {
 

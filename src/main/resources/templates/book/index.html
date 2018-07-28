@@ -9,6 +9,10 @@
 <div layout:fragment="content" class="container">
     <div class="panel-body">
         <form class="form-inline">
+            <select id="apiTpye" name="apiType" class="span2">
+                <option th:each="apiType : ${apiTypes}" th:value="${apiType.code}" th:text="${apiType.name}"
+                        th:selected="${searchOption.apiType.code} == ${apiType.code}"></option>
+            </select>
             <select id="target" name="target" class="span2">
                 <option th:each="target : ${targets}" th:value="${target.target}" th:text="${target.displayName}"
                         th:selected="${searchOption.target} == ${target.target}"></option>
@@ -38,22 +42,23 @@
                     <td th:text="${book.authors}"></td>
                     <td th:text="${book.publisher}"></td>
                     <td th:text="${#calendars.format(book.datetime, 'YYYY-MM-dd')}"></td>
-                    <td th:text="${#numbers.formatInteger(book.price, 3, 'COMMA')} + '원'"></td>
+                    <td th:text="${#numbers.formatInteger(book.salePrice, 3, 'COMMA')} + '원'"></td>
                     <td><a class="btn btn-small bookMarkLink" th:attr="title=${book.title}, isbn=${book.isbn}" sec:authorize="isAuthenticated()"><i class="icon-bookmark"></i></a></td>
                 </tr>
             </tbody>
         </table>
         <div class="pagination pagination-centered">
             <ul>
-                <li th:if="${pagingInfo.prev}"><a th:href="${pagingInfo.startPage} - 1">&laquo;</a></li>
-                <li th:classappend="${p.pageNumber} == ${searchOption.page} - 1 ? 'active' : '' " th:each="p:${pagingInfo.pageList}">
-                    <a th:href="${p.pageNumber} +1" th:text="${p.pageNumber} + 1"></a></li>
-                <li th:if="${pagingInfo.next}"><a th:href="${pagingInfo.endPage} + 1">&raquo;</a></li>
+                <li th:if="${pagingInfo.isPreviousVisible()}"><a th:href="${pagingInfo.startPage} - 1">&laquo;</a></li>
+                <li th:classappend="${p.isCurrentPage()} ? 'active' : '' " th:each="p:${pagingInfo.getPageElements()}">
+                    <a th:href="${p.pageNumber}" th:text="${p.pageNumber}"></a></li>
+                <li th:if="${pagingInfo.isNextVisible()}"><a th:href="${pagingInfo.endPage} + 1">&raquo;</a></li>
             </ul>
         </div>
     </div>
 
     <form id='searchForm' th:action="@{/book}" method="get">
+        <input type='hidden' name='apiType' th:value="${searchOption.apiType.code}" />
         <input type='hidden' name='page' th:value="${searchOption.page}" />
         <input type='hidden' name='size' th:value="${searchOption.size}" />
         <input type='hidden' name='target' th:value="${searchOption.target}"/>
@@ -67,12 +72,15 @@
             var searchForm = $("#searchForm");
 
             $("#searchBtn").click(function () {
+                var apiType = $("#apiType").find(":selected").val();
                 var target = $("#target").find(":selected").val();
                 var query = $("#query").val();
+                console.log(apiType);
+                searchForm.find("[name='apiType']").val(apiType);
                 searchForm.find("[name='target']").val(target);
                 searchForm.find("[name='query']").val(query);
                 searchForm.find("[name='page']").val("1");
-                searchForm.submit();
+                //searchForm.submit();
             });
 
             $("#searchBtn").keypress(function(e) {
@@ -90,6 +98,11 @@
             $(".bookLink").click(function(e){
                 e.preventDefault();
                 var isbn = $(this).attr("isbn");
+                if (isbn == 'NOT_EXISTS_ISBN') {
+                    alert('isbn정보가 없는 도서는 상세정보를 볼 수 없습니다.');
+                    return;
+                }
+
                 searchForm.attr('action','/book/view');
                 var type = searchForm.find("[name='target']").val();
                 var keyword = searchForm.find("[name='query']").val();
@@ -106,6 +119,11 @@
                     isbn: $(this).attr("isbn"),
                     title: $(this).attr("title")
                 };
+
+                if (bookmark.isbn == 'NOT_EXISTS_ISBN') {
+                    alert('isbn정보가 없는 도서는 북마크가 불가합니다.');
+                    return;
+                }
 
                 if (!confirm("북마크를 등록하시겠습니까?")) {
                     return;

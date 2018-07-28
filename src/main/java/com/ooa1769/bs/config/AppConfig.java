@@ -4,6 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.ooa1769.bs.book.support.search.ApiSearchType;
+import com.ooa1769.bs.book.support.search.kakao.KakaoCategoryType;
+import com.ooa1769.bs.book.support.search.kakao.KakaoSortType;
+import com.ooa1769.bs.book.support.search.kakao.KakaoTargetType;
+import com.ooa1769.bs.book.support.search.naver.NaverCategoryType;
+import com.ooa1769.bs.book.support.search.naver.NaverSortType;
+import com.ooa1769.bs.book.support.search.naver.NaverTargetType;
+import com.ooa1769.bs.support.domain.EnumMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -17,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
-//@PropertySource({ "classpath:kakao.properties" })
 public class AppConfig {
 
     @Bean
@@ -47,16 +54,14 @@ public class AppConfig {
     }
 
     @Bean
-    public static PropertySourcesPlaceholderConfigurer properties() {
-        final PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
-        return pspc;
+    public EnumMapper enumMapper() {
+        EnumMapper enumMapper = new EnumMapper();
+        enumMapper.put(ApiSearchType.KAKAO_TARGET, KakaoTargetType.class);
+        enumMapper.put(ApiSearchType.KAKAO_CATEGORY, KakaoCategoryType.class);
+        enumMapper.put(ApiSearchType.KAKAO_SORT, KakaoSortType.class);
+        //enumMapper.put(ApiSearchType.NAVER_TARGET, NaverTargetType.class);
+        //enumMapper.put(ApiSearchType.NAVER_CATEGORY, NaverCategoryType.class);
+        //enumMapper.put(ApiSearchType.NAVER_SORT, NaverSortType.class);
+        return enumMapper;
     }
-
-    /*@Bean
-    public KakaoApiProperties kakaoProperties() {
-        KakaoApiProperties kakaoApiProperties = new KakaoApiProperties();
-        kakaoApiProperties.setKey(env.getProperty("kakao.web.key"));
-        kakaoApiProperties.setUrl(env.getProperty("kakao.web.url"));
-        return kakaoApiProperties;
-    }*/
 }

@@ -1,9 +1,9 @@
 package com.ooa1769.bs.book.support;
 
-import com.ooa1769.bs.book.Book;
-import com.ooa1769.bs.book.BookMark;
-import com.ooa1769.bs.book.BookNotFoundException;
-import com.ooa1769.bs.book.SearchOption;
+import com.ooa1769.bs.book.domain.*;
+import com.ooa1769.bs.book.support.search.ApiType;
+import com.ooa1769.bs.web.dto.BookSearchParam;
+import com.ooa1769.bs.book.support.search.SearchService;
 import com.ooa1769.bs.member.Member;
 import com.ooa1769.bs.web.dto.BookMarkDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +25,12 @@ public class BookService {
         this.bookMarkRepository = bookMarkRepository;
     }
 
-    public Page<Book> getBooksByKeyword(SearchOption searchOption) {
-        return searchService.search(searchOption);
+    public Page<Book> getBooksByKeyword(ApiType apiType, BookSearchParam bookSearchParam) {
+        return searchService.search(apiType, bookSearchParam);
     }
 
-    public Book getBookByIsbn(SearchOption searchOption) {
-        Page<Book> pageBook = searchService.search(searchOption);
+    public Book getBookByIsbn(ApiType apiType, BookSearchParam bookSearchParam) {
+        Page<Book> pageBook = searchService.search(apiType, bookSearchParam);
         if (pageBook.getTotalElements() == 0) {
             throw new BookNotFoundException("해당 책이 존재하지 않습니다.");
         }
@@ -50,7 +50,7 @@ public class BookService {
     @Transactional(readOnly = true)
     public BookMark getBookMarkById(Long id) {
         return bookMarkRepository.findById(id)
-                .orElseThrow(() -> new IllegalStateException("해당 북마크가 존재하지 않습니다."));
+                .orElseThrow(() -> new BookMarkNotFoundException("해당 북마크가 존재하지 않습니다."));
     }
 
     @Transactional(readOnly = true)
@@ -59,7 +59,7 @@ public class BookService {
     }
 
     @Transactional(readOnly = true)
-    public boolean isAddedBookMarkByMemberAndIsbn(Member member, String isbn) {
+    public boolean isAddedBookMarkByMemberAndIsbn(Member member, Isbn isbn) {
         return bookMarkRepository.findByMemberAndIsbn(member, isbn).isPresent();
     }
 }

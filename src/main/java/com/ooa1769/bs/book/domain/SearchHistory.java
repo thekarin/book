@@ -1,17 +1,22 @@
-package com.ooa1769.bs.member;
+package com.ooa1769.bs.book.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ooa1769.bs.member.Member;
 import lombok.Getter;
+import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.Temporal;
 import java.util.Objects;
 
-@Embeddable
+@Entity
+@Table(name = "search_history")
 public class SearchHistory {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Getter
     @Column(nullable = false)
@@ -21,15 +26,23 @@ public class SearchHistory {
     @Column(nullable = false)
     private LocalDateTime searchDate;
 
+    @Getter
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
+
     protected SearchHistory() {}
 
-    public SearchHistory(String searchKeyword) {
+    public SearchHistory(String searchKeyword, Member member) {
         this.searchKeyword = searchKeyword;
+        this.member = member;
         this.searchDate = LocalDateTime.now();
     }
 
-    public SearchHistory(String searchKeyword, LocalDateTime searchDate) {
+    public SearchHistory(String searchKeyword, Member member, LocalDateTime searchDate) {
         this.searchKeyword = searchKeyword;
+        this.member = member;
         this.searchDate = searchDate;
     }
 

@@ -4,11 +4,9 @@ import com.ooa1769.bs.support.domain.UrlGeneratable;
 import com.ooa1769.bs.support.jpa.AbstractEntity;
 import com.ooa1769.bs.support.jpa.BooleanToYNConverter;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
-import java.util.Set;
 
 @Slf4j
 @Entity
@@ -37,17 +35,11 @@ public class Member extends AbstractEntity implements UrlGeneratable {
     @Column
     private boolean enabled = true;
 
-    @Getter
-    @Setter
-    @ElementCollection
-    @CollectionTable(
-            name = "search_history",
-            joinColumns = @JoinColumn(name = "member_id")
-    )
-    @org.hibernate.annotations.OrderBy(clause = "searchDate desc")
-    private Set<SearchHistory> searchHistories;
-
     protected Member() {}
+
+    public Member(String email) {
+        this.email = email;
+    }
 
     public Member(String email, String name, String password, boolean enabled) {
         this.email = email;
@@ -56,40 +48,27 @@ public class Member extends AbstractEntity implements UrlGeneratable {
         this.enabled = enabled;
     }
 
-    public Member(Long id, String email, String name, String password, boolean enabled, Set<SearchHistory> searchHistories) {
+    public Member(Long id, String email, String name, String password, boolean enabled) {
         this.id = id;
         this.email = email;
         this.name = name;
         this.password = password;
         this.enabled = enabled;
-        this.searchHistories = searchHistories;
-    }
-
-    public void addSearchHistory(SearchHistory searchHistory) {
-        if (searchHistories.contains(searchHistory)) {
-            searchHistories.remove(searchHistory);
-        }
-        searchHistories.add(searchHistory);
-    }
-
-    public void removeHistory(SearchHistory searchHistory) {
-        searchHistories.remove(searchHistory);
-    }
-
-    public SearchHistory findByKeyword(String searchKeyword) {
-        return findByKeyword(new SearchHistory(searchKeyword));
-    }
-
-    public SearchHistory findByKeyword(SearchHistory searchHistory) {
-        return searchHistories.stream()
-                .filter(s -> s.equals(searchHistory))
-                .findFirst()
-                .orElse(null);
     }
 
     @Override
-    public String generateUrl() {
-        return null;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Member member = (Member) o;
+
+        return email != null ? email.equals(member.email) : member.email == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return email != null ? email.hashCode() : 0;
     }
 
     @Override
@@ -99,7 +78,6 @@ public class Member extends AbstractEntity implements UrlGeneratable {
 
     @Override
     public String toString() {
-        return "Member [id=" + id + ", email=" + email + ", name=" + name + ", password=" + password + ", enabled=" + enabled +
-                ", searchHistories=" + searchHistories + "]";
+        return "Member [id=" + id + ", email=" + email + ", name=" + name + ", password=" + password + ", enabled=" + enabled + "]";
     }
 }

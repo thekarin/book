@@ -23,7 +23,7 @@
                 <td colspan="5">저장한 북마크가 없습니다.</td>
             </tr>
             <tr th:each="bookmark, index : ${bookmarks}">
-                <td th:text="${index.index + 1}"></td>
+                <td th:text="${index.index + 1 + (pageable.getPageNumber() * pageable.getPageSize())}"></td>
                 <td th:text="${bookmark.isbn}"></td>
                 <td th:text="${bookmark.title}"></td>
                 <td th:text="${bookmark.formattedCreateDate}"></td>
@@ -33,16 +33,16 @@
         </table>
         <div class="pagination pagination-centered">
             <ul>
-                <li th:if="${pagingInfo.prev}"><a th:href="${pagingInfo.startPage} - 1">&laquo;</a></li>
-                <li th:classappend="${p.pageNumber} == ${searchOption.page} - 1 ? 'active' : '' " th:each="p:${pagingInfo.pageList}">
-                    <a th:href="${p.pageNumber} +1" th:text="${p.pageNumber} + 1"></a></li>
-                <li th:if="${pagingInfo.next}"><a th:href="${pagingInfo.endPage} + 1">&raquo;</a></li>
+                <li th:if="${pagingInfo.isPreviousVisible()}"><a th:href="${pagingInfo.startPage} - 1">&laquo;</a></li>
+                <li th:classappend="${p.isCurrentPage()} ? 'active' : '' " th:each="p:${pagingInfo.getPageElements()}">
+                    <a th:href="${p.pageNumber}" th:text="${p.pageNumber}"></a></li>
+                <li th:if="${pagingInfo.isNextVisible()}"><a th:href="${pagingInfo.endPage} + 1">&raquo;</a></li>
             </ul>
         </div>
     </div>
-    <form id='pagingForm' th:action="@{/book/bookmark}" method="get">
-        <input type='hidden' name='page' th:value="${searchOption.page}" />
-        <input type='hidden' name='size' th:value="${searchOption.size}" />
+    <form id='pagingForm' th:action="@{/bookmark}" method="get">
+        <input type='hidden' name='page' th:value="${pageable.getPageNumber() + 1}" />
+        <input type='hidden' name='size' th:value="${pageable.getPageSize()}" />
     </form>
 </div>
 </body>

@@ -21,13 +21,13 @@
                 <li><a th:href="@{/member/form}" sec:authorize="isAnonymous()"> 회원가입 </a></li>
             </ul>
             <ul class="nav">
-                <li><a th:href="@{/book}" sec:authorize="isAuthenticated()"> 책검색 </a></li>
+                <li><a th:href="@{/search/kakao}" sec:authorize="isAuthenticated()"> 카카오 책 검색 </a></li>
             </ul>
             <ul class="nav">
-                <li><a th:href="@{/book/bookmark}" sec:authorize="isAuthenticated()"> 북마크 </a></li>
+                <li><a th:href="@{/bookmark}" sec:authorize="isAuthenticated()"> 북마크 </a></li>
             </ul>
             <ul class="nav">
-                <li><a th:href="@{/member/history}" sec:authorize="isAuthenticated()"> 최근 검색 </a></li>
+                <li><a th:href="@{/history}" sec:authorize="isAuthenticated()"> 최근 검색 </a></li>
             </ul>
             <ul class="nav pull-right" sec:authorize="isAuthenticated()">
                 <li><a class="menu-right" > Hi, <span sec:authentication="principal.username"></span> </a></li>

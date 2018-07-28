@@ -5,7 +5,6 @@ import com.ooa1769.bs.member.support.MemberRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
-import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -30,16 +29,13 @@ public class LoginUserHandlerMethodArgumentResolver implements HandlerMethodArgu
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
-        /*
-        if (authentication.getAuthorities().contains()) {
-            LoginMember loginMember = parameter.getParameterAnnotation(LoginMember.class);
-            if (loginMember.required()) {
-                throw new UnAuthorizedException("로그인이 필요합니다.");
-            }
-        }*/
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        Optional<Member> memberOpt = memberRepository.findByEmail(email);
-        return memberOpt.orElseThrow(() -> new UnAuthorizedException("로그인이 필요합니다."));
+        LoginMember loginUser = parameter.getParameterAnnotation(LoginMember.class);
+        if (loginUser.query()) {
+            Optional<Member> memberOpt = memberRepository.findByEmail(authentication.getName());
+            return memberOpt.get();
+        }
+
+        return new Member(authentication.getName());
     }
 }

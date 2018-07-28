@@ -13,7 +13,7 @@
             <p th:text="${book.contents}"></p>
             <ul class="thumbnails">
                 <li class="span4">
-                    <a href="#" class="thumbnail">
+                    <a target="_blank" th:href="@{${book.url}}" class="thumbnail">
                         <img th:attr="src=${book.thumbnail}"/>
                     </a>
                 </li>
@@ -44,10 +44,12 @@
                     </table>
                 </li>
             </ul>
-            <p><a th:href="@{ /book(page=${searchOption.page},
+            <p><a th:href="@{'/search/' + ${apiType.code} (page=${searchOption.page},
 			                size=${searchOption.size},
-			                query=${keyword},
-			                target=${type}
+			                query=${prevSearchOption.prevQuery},
+			                target=${prevSearchOption.prevTarget},
+			                category=${prevSearchOption.prevCategory},
+			                sort=${prevSearchOption.prevSort}
 			             )}" class="btn btn-small btn-primary pull-right" >목록으로</a>
             </p>
         </div>
