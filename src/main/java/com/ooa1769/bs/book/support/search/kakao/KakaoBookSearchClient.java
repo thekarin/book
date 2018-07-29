@@ -3,7 +3,10 @@ package com.ooa1769.bs.book.support.search.kakao;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ooa1769.bs.book.domain.*;
+import com.ooa1769.bs.book.support.search.ApiUrlQueryBuilder;
 import com.ooa1769.bs.book.support.search.BookSearchClient;
+import com.ooa1769.bs.book.support.search.SearchException;
+import com.ooa1769.bs.web.dto.BookSearchParam;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -24,7 +26,6 @@ import org.springframework.web.client.RestTemplate;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -43,12 +44,13 @@ public class KakaoBookSearchClient implements BookSearchClient {
     }
 
     @Override
-    public Page<Book> search(Pageable pageable, Map<String, String> queryParam) {
-        if (StringUtils.isEmpty(queryParam.get("query"))) {
+    public Page<Book> search(BookSearchParam bookSearchParam) {
+        if (StringUtils.isEmpty(bookSearchParam.getQuery())) {
             return new PageImpl<>(Collections.emptyList());
         }
 
-        Optional<SearchResult> resultOpt = execute(queryParam);
+        String url = ApiUrlQueryBuilder.urlForQueryParams(properties.getUrl(), properties.queryParam(bookSearchParam));
+        Optional<SearchResult> resultOpt = execute(url);
 
         if (resultOpt.isPresent()) {
             SearchResult searchResult = resultOpt.get();
@@ -58,17 +60,16 @@ public class KakaoBookSearchClient implements BookSearchClient {
 
             log.debug("books count : {}, pageableCount : {}", books.size(), searchResult.getMeta().getPageableCount());
             return new PageImpl<>(books,
-                    pageable,
+                    bookSearchParam.pageable(),
                     searchResult.getMeta().getPageableCount());
         }
 
         return new PageImpl<>(Collections.emptyList());
     }
 
-    private Optional<SearchResult> execute(Map<String, String> queryParam) {
+    private Optional<SearchResult> execute(String url) {
         ResponseEntity<SearchResult> responseEntity = null;
 
-        String url = properties.requestUrl(queryParam);
         try {
             responseEntity = restTemplate.exchange(url,
                     HttpMethod.GET,
@@ -76,6 +77,7 @@ public class KakaoBookSearchClient implements BookSearchClient {
                     SearchResult.class);
         } catch (RestClientException e) {
             log.error("RestClientException {}", e.getMessage());
+            throw new SearchException("네이버 책 검색 API 호출 중 오류가 발생하였습니다.");
         }
 
         return Optional.ofNullable(responseEntity.getBody());

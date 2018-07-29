@@ -11,7 +11,6 @@ public enum ApiSearchType {
     KAKAO_CATEGORY(ApiType.KAKAO, SearchType.CATEGORY),
     KAKAO_SORT(ApiType.KAKAO, SearchType.SORT),
     NAVER_TARGET(ApiType.NAVER, SearchType.TARGET),
-    NAVER_CATEGORY(ApiType.NAVER, SearchType.CATEGORY),
     NAVER_SORT(ApiType.NAVER, SearchType.SORT);
 
     private ApiType apiType;

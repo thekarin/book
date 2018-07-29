@@ -9,7 +9,9 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class Isbn {
 
+    private final static int ISBN_8_LENGTH = 8;
     private final static int ISBN_10_LENGTH = 10;
+    private final static int ISBN_12_LENGTH = 12;
     private final static int ISBN_13_LENGTH = 13;
 
     public final static String NOT_EXISTS_ISBN_STR = "NOT_EXISTS_ISBN";
@@ -25,8 +27,13 @@ public class Isbn {
         this.isbn = isbn;
     }
 
+    // 네이버 api검색시 8자리 12자리인 케이스
     private boolean isValidIsbnLength(String isbn) {
-        return isbn.length() == ISBN_13_LENGTH || isbn.length() == ISBN_10_LENGTH || NOT_EXISTS_ISBN_STR.equals(isbn);
+        return isbn.length() == ISBN_13_LENGTH ||
+                isbn.length() == ISBN_12_LENGTH ||
+                isbn.length() == ISBN_10_LENGTH ||
+                isbn.length() == ISBN_8_LENGTH ||
+                NOT_EXISTS_ISBN_STR.equals(isbn);
     }
 
     public static Isbn createIsbnByApi(String isbn) {

@@ -11,6 +11,10 @@ public enum SaleStatus {
         this.status = status;
     }
 
+    public boolean isSale() {
+        return this == Y ? true : false;
+    }
+
     @Override
     public String toString() {
         return status;

@@ -14,11 +14,12 @@
                 <option th:each="t : ${targets}" th:value="${t.code}" th:text="${t.displayName}"
                         th:selected="${searchOption.target} == ${t.code}"></option>
             </select>
-            <select id="category" name="category" class="span2">
+
+            <select th:if="${apiType.code == 'kakao'}" id="category" name="category" class="span2">
                 <option th:each="c : ${categories}" th:value="${c.code}" th:text="${c.displayName}"
                         th:selected="${searchOption.category} == ${c.code}"></option>
             </select>
-            <select id="sort" name="sort" class="span2">
+            <select id="sort" name="sort" class="span2 pull-right">
                 <option th:each="s : ${sorts}" th:value="${s.code}" th:text="${s.displayName}"
                         th:selected="${searchOption.sort} == ${s.code}"></option>
             </select>
@@ -43,11 +44,12 @@
             </tr>
             <tr th:each="book, index : ${books}">
                 <td th:text="${index.index + 1 + ((searchOption.page - 1) * searchOption.size)}"></td>
-                <td><a class="bookLink" th:attr="isbn=${book.isbn}" href="#" th:text="${book.title}"></a></td>
+                <td><a class="bookLink" th:attr="isbn=${book.isbn}" href="#" th:inline="text">[[${book.title}]]</a></td>
                 <td th:text="${book.authors}"></td>
                 <td th:text="${book.publisher}"></td>
                 <td th:text="${#calendars.format(book.datetime, 'YYYY-MM-dd')}"></td>
-                <td th:text="${#numbers.formatInteger(book.salePrice, 3, 'COMMA')} + '원'"></td>
+                <td th:if="${book.saleStatus.isSale()}" th:text="${#numbers.formatInteger(book.salePrice, 3, 'COMMA')} + '원'"></td>
+                <td th:unless="${book.saleStatus.isSale()}" th:text="${'가격확인 중'}"></td>
                 <td><a class="btn btn-small bookMarkLink" th:attr="title=${book.title}, isbn=${book.isbn}" sec:authorize="isAuthenticated()"><i class="icon-bookmark"></i></a></td>
             </tr>
             </tbody>
@@ -111,16 +113,23 @@
                 }
 
                 searchForm.attr('action', '/book/' + $('#apiType').val());
+                var prevPage = searchForm.find("[name='page']").val();
+                var prevSize = searchForm.find("[name='size']").val();
                 var prevTarget = searchForm.find("[name='target']").val();
                 var prevQuery = searchForm.find("[name='query']").val();
                 var prevCategory = searchForm.find("[name='category']").val();
                 var prevSort = searchForm.find("[name='sort']").val();
+                searchForm.append('<input type="hidden" name="prevPage" value="' + prevPage + '"/>');
+                searchForm.append('<input type="hidden" name="prevSize" value="' + prevSize + '"/>');
                 searchForm.append('<input type="hidden" name="prevTarget" value="' + prevTarget + '"/>');
                 searchForm.append('<input type="hidden" name="prevQuery" value="' + prevQuery +'"/>');
                 searchForm.append('<input type="hidden" name="prevCategory" value="' + prevCategory + '"/>');
                 searchForm.append('<input type="hidden" name="prevSort" value="' + prevSort +'"/>');
-                searchForm.find('[name="target"]').val('isbn');
+                var isbnParam = $('#apiType').val() == 'kakao' ? 'isbn' : 'd_isbn';
+                searchForm.find('[name="target"]').val(isbnParam);
                 searchForm.find('[name="query"]').val(isbn);
+                searchForm.find('[name="page"]').val(1);
+                searchForm.find('[name="size"]').val(1);
                 searchForm.find('[name="category"]').val('ALL');
                 searchForm.submit();
             });

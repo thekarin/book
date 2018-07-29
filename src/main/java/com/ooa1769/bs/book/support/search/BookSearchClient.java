@@ -1,12 +1,10 @@
 package com.ooa1769.bs.book.support.search;
 
 import com.ooa1769.bs.book.domain.Book;
+import com.ooa1769.bs.web.dto.BookSearchParam;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
-import java.util.Map;
 
 public interface BookSearchClient {
 
-    Page<Book> search(Pageable pageable, Map<String, String> queryParam);
+    Page<Book> search(BookSearchParam bookSearchParam);
 }

@@ -13,14 +13,17 @@ import java.util.Map;
 @Service
 public class SearchService {
 
-    private Map<ApiType, BookSearchClient> searchers = new HashMap<>();
+    private Map<ApiType, BookSearchClient> bookSearchClients = new HashMap<>();
 
     @Autowired
-    public SearchService(@Qualifier("kakao") BookSearchClient bookSearchClient) {
-        searchers.put(ApiType.KAKAO, bookSearchClient);
+    public SearchService(@Qualifier("kakao") BookSearchClient kakaoBookSearchClient,
+                         @Qualifier("naver") BookSearchClient naverBookSearchClient) {
+        bookSearchClients.put(ApiType.KAKAO, kakaoBookSearchClient);
+        bookSearchClients.put(ApiType.NAVER, naverBookSearchClient);
     }
 
     public Page<Book> search(ApiType apiType, BookSearchParam bookSearchParam) {
-        return searchers.get(apiType).search(bookSearchParam.pageable(), bookSearchParam.queryParam());
+        BookSearchClient bookSearchClient = bookSearchClients.get(apiType);
+        return bookSearchClient.search(bookSearchParam);
     }
 }

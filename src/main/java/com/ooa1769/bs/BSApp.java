@@ -18,7 +18,7 @@ public class BSApp {
 
     public static void main(String[] args) {
         new SpringApplicationBuilder(BSApp.class)
-                .properties("spring.config.location=classpath:kakao.properties")
+                .properties("spring.config.location=classpath:kakao.properties, classpath:naver.properties")
                 .run(args);
     }
 }

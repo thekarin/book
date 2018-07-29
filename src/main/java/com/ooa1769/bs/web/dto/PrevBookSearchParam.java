@@ -7,6 +7,8 @@ import lombok.Setter;
 @Setter
 public class PrevBookSearchParam {
 
+    private int prevPage;
+    private int prevSize;
     private String prevTarget;
     private String prevQuery;
     private String prevCategory;

@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@TestPropertySource(value = {"classpath:kakao.properties"})
+@TestPropertySource(value = {"classpath:kakao.properties", "classpath:naver.properties"})
 @SpringBootTest
 @AutoConfigureMockMvc
 public class ApiBookControllerTest {

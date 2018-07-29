@@ -2,17 +2,10 @@ package com.ooa1769.bs.config;
 
 import com.ooa1769.bs.support.domain.ApiTypeConverter;
 import com.ooa1769.bs.support.security.LoginUserHandlerMethodArgumentResolver;
-import org.springframework.boot.context.config.ResourceNotFoundException;
-import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
-import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
-import org.springframework.boot.web.servlet.ErrorPage;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
@@ -54,18 +47,5 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
         registry.addConverter(new ApiTypeConverter());
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public void handleException(ResourceNotFoundException ex) {
-    }
 
-    @Configuration
-    public static class ErrorConfig implements EmbeddedServletContainerCustomizer {
-
-        @Override
-        public void customize(ConfigurableEmbeddedServletContainer factory) {
-            factory.addErrorPages(new ErrorPage(HttpStatus.NOT_FOUND, "/404"));
-            factory.addErrorPages(new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/500"));
-        }
-    }
 }

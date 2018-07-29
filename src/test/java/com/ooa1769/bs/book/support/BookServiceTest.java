@@ -14,7 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
-@TestPropertySource(value = {"classpath:kakao.properties"})
+@TestPropertySource(value = {"classpath:kakao.properties","classpath:naver.properties"})
 @SpringBootTest
 public class BookServiceTest {
 
@@ -22,14 +22,27 @@ public class BookServiceTest {
     private BookService bookService;
 
     @Test
-    public void 책_검색() throws Exception {
-        BookSearchParam searchOption = new BookSearchParam();
-        searchOption.setQuery("토비의 스프링");
-        searchOption.setTarget("title");
+    public void 카카오_책_검색() throws Exception {
+        BookSearchParam bookSearchParam = new BookSearchParam();
+        bookSearchParam.setQuery("토비의 스프링");
+        bookSearchParam.setTarget("title");
 
-        Page<Book> books = bookService.getBooksByKeyword(ApiType.KAKAO, searchOption);
+        Page<Book> books = bookService.getBooksByKeyword(ApiType.KAKAO, bookSearchParam);
         assertThat(books).isNotEmpty();
         assertThat(books.getNumber()).isEqualTo(0);
         assertThat(books.getSize()).isEqualTo(10);
+    }
+
+    @Test
+    public void 네이버_책_검색() throws Exception {
+        BookSearchParam bookSearchParam = new BookSearchParam();
+        bookSearchParam.setQuery("토비의 스프링");
+        bookSearchParam.setTarget("d_titl");
+        bookSearchParam.setSort("date");
+
+        Page<Book> books = bookService.getBooksByKeyword(ApiType.NAVER, bookSearchParam);
+        //assertThat(books).isNotEmpty();
+        //assertThat(books.getNumber()).isEqualTo(0);
+        //assertThat(books.getSize()).isEqualTo(10);
     }
 }
